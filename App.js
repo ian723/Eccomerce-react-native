@@ -1,0 +1,89 @@
+import React from 'react';
+import { SafeAreaView, StyleSheet, Platform } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
+import HomeScreen from './src/screens/home/HomeScreen';
+import DetailScreen from './src/screens/detail/DetailScreen';
+import CartScreen from './src/screens/cart/CartScreen';
+import AccountScreen from './src/screens/account/AccountScreen';
+import { CartProvider } from './src/context/CartContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+
+
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+
+const App = () => {
+  return (
+    <SafeAreaView style={styles.AndroidSafeArea}>
+      <AuthProvider>
+        <CartProvider>
+          <NavigationContainer>
+            <Tab.Navigator
+              screenOptions={({ route }) => ({
+                tabBarIcon: ({ focused, size, color }) => {
+                  let iconName;
+
+
+                  if (route.name === 'HomeTab') {
+                    iconName = focused ? 'home' : 'home-outline';
+                  } else if (route.name === 'Cart') {
+                    iconName = focused ? 'cart' : 'cart-outline';
+                  } else if (route.name === 'Account') {
+                    iconName = focused ? 'person' : 'person-outline';
+                  }
+                  return <Ionicons name={iconName} size={size} color={color} />;
+                },
+                tabBarActiveTintColor: 'tomato',
+                tabBarInactiveTintColor: 'gray',
+              })}
+            >
+              <Tab.Screen name='HomeTab' component={HomeStackScreen} options={{ title: 'Welcome to Shop' }} />
+              <Tab.Screen name='Cart' component={CartScreen} options={{ title: 'Cart' }} />
+              <Tab.Screen name='Account' component={AccountScreen} options={{ title: 'Account' }} />
+            </Tab.Navigator>
+          </NavigationContainer>
+        </CartProvider>
+      </AuthProvider>
+    </SafeAreaView>
+  );
+};
+
+
+const HomeStackScreen = () => {
+  const { user } = useAuth();
+
+
+  return (
+    <Stack.Navigator>
+      {user ? (
+        <>
+          <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
+          <Stack.Screen name='DetailScreen' component={DetailScreen} />
+        </>
+      ) : (
+        <Stack.Screen name='Account' component={AccountScreen} options={{ headerShown: false }} />
+      )}
+    </Stack.Navigator>
+  );
+};
+
+
+const styles = StyleSheet.create({
+  AndroidSafeArea: {
+    flex: 1,
+    backgroundColor: 'white',
+    paddingTop: Platform.OS === 'android' ? 25 : 0,
+  },
+});
+
+
+export default App;
+
+
+
+
+
